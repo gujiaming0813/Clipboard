@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 @main
 struct ClipboardApp: App {
@@ -40,4 +41,3 @@ final class AppServices: ObservableObject {
         }
     }
 }
-

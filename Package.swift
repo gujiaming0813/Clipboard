@@ -7,13 +7,13 @@ let package = Package(
         .macOS(.v14)
     ],
     products: [
-        .executable(
-            name: "ClipboardApp",
+        .library(
+            name: "ClipboardCore",
             targets: ["ClipboardApp"]
         )
     ],
     targets: [
-        .executableTarget(
+        .target(
             name: "ClipboardApp",
             path: "Sources/ClipboardApp"
         )
