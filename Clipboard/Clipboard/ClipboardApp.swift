@@ -6,6 +6,12 @@ struct ClipboardApp: App {
     @StateObject private var services = AppServices()
 
     var body: some Scene {
+        MenuBarExtra("Clipboard", systemImage: "scissors") {
+            HistoryView()
+                .environmentObject(services.historyStore)
+                .environmentObject(services.monitor)
+                .frame(width: 360, height: 520)
+        }
         Settings {
             PreferencesView()
                 .environmentObject(services.historyStore)
@@ -18,16 +24,12 @@ struct ClipboardApp: App {
 final class AppServices: ObservableObject {
     let historyStore: ClipboardHistoryStore
     let monitor: ClipboardMonitor
-    let hotkeyManager: HotkeyManager
-    let statusController: StatusItemController
 
     init() {
         let cache = CacheManager()
         let store = ClipboardHistoryStore(cacheManager: cache, limit: 100)
         historyStore = store
         monitor = ClipboardMonitor(history: store)
-        hotkeyManager = HotkeyManager()
-        statusController = StatusItemController(historyStore: store, monitor: monitor)
 
         DispatchQueue.main.async { [weak self] in
             self?.start()
@@ -36,8 +38,5 @@ final class AppServices: ObservableObject {
 
     private func start() {
         monitor.start()
-        hotkeyManager.register { [weak self] in
-            self?.statusController.togglePopover()
-        }
     }
 }
