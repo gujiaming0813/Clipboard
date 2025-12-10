@@ -79,17 +79,21 @@ final class StatusItemController: NSObject {
     }
 
     private func showPanel() {
-        guard let panel = panel, let button = statusItem.button else { return }
+        guard let panel = panel else { return }
         
-        // 计算窗口位置（在状态栏按钮下方）
-        guard let window = button.window else { return }
-        let buttonRect = window.convertToScreen(button.frame)
         let screenFrame = NSScreen.main?.frame ?? .zero
-        
-        // 计算窗口位置，确保不超出屏幕
         var panelFrame = panel.frame
-        panelFrame.origin.x = buttonRect.midX - panelFrame.width / 2
-        panelFrame.origin.y = screenFrame.height - buttonRect.maxY - panelFrame.height - 8
+        
+        // 尝试从状态栏按钮获取位置
+        if let button = statusItem.button, let window = button.window {
+            let buttonRect = window.convertToScreen(button.frame)
+            panelFrame.origin.x = buttonRect.midX - panelFrame.width / 2
+            panelFrame.origin.y = screenFrame.height - buttonRect.maxY - panelFrame.height - 8
+        } else {
+            // 如果没有状态栏按钮窗口（例如通过快捷键调用），居中显示在屏幕上方
+            panelFrame.origin.x = (screenFrame.width - panelFrame.width) / 2
+            panelFrame.origin.y = screenFrame.height - panelFrame.height - 100
+        }
         
         // 确保窗口不超出屏幕左边界
         if panelFrame.origin.x < 8 {

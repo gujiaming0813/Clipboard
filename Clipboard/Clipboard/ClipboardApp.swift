@@ -27,6 +27,7 @@ final class AppServices: ObservableObject {
     let historyStore: ClipboardHistoryStore
     let monitor: ClipboardMonitor
     let hotkeyManager: HotkeyManager
+    let statusController: StatusItemController
 
     init() {
         let cache = CacheManager()
@@ -34,6 +35,7 @@ final class AppServices: ObservableObject {
         historyStore = store
         monitor = ClipboardMonitor(history: store)
         hotkeyManager = HotkeyManager()
+        statusController = StatusItemController(historyStore: store, monitor: monitor)
 
         DispatchQueue.main.async { [weak self] in
             self?.start()
@@ -42,8 +44,8 @@ final class AppServices: ObservableObject {
 
     private func start() {
         monitor.start()
-        hotkeyManager.register {
-            NSApp.activate(ignoringOtherApps: true)
+        hotkeyManager.register { [weak self] in
+            self?.statusController.togglePopover()
         }
     }
 }
