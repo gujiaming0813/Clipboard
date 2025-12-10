@@ -6,14 +6,6 @@ struct ClipboardApp: App {
     @StateObject private var services = AppServices()
 
     var body: some Scene {
-        MenuBarExtra("Clipboard", systemImage: "scissors") {
-            HistoryView()
-                .environmentObject(services.historyStore)
-                .environmentObject(services.monitor)
-                .frame(width: 360, height: 520)
-        }
-        .menuBarExtraStyle(.window) // 使用窗口样式以支持热键激活
-        
         Settings {
             PreferencesView()
                 .environmentObject(services.historyStore)
