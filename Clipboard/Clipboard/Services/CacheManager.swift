@@ -58,8 +58,10 @@ final class CacheManager {
 
     private func persistImages(_ items: [ClipboardItem]) {
         for item in items {
-            guard case .image(let data) = item.content else { continue }
-            let url = directory.appendingPathComponent("img_\(item.id).png")
+            guard case .image(let data, _) = item.content else { continue }
+            // 根据 UTI 决定文件扩展名
+            let ext = item.isGif ? "gif" : "png"
+            let url = directory.appendingPathComponent("img_\(item.id).\(ext)")
             try? data.write(to: url, options: .atomic)
         }
     }

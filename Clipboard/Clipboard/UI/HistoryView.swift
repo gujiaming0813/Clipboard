@@ -119,7 +119,7 @@ private struct HistoryRow: View {
                 .truncationMode(.tail)
                 .multilineTextAlignment(.leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
-        case .image(let data):
+        case .image(let data, _):
             if let nsImage = NSImage(data: data) {
                 Image(nsImage: nsImage)
                     .resizable()

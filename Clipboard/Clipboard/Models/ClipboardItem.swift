@@ -1,12 +1,13 @@
 import Foundation
 import SwiftUI
+import UniformTypeIdentifiers
 
 enum ClipboardContent: Equatable, Hashable, Codable {
     case text(String)
-    case image(Data)
+    case image(data: Data, uti: String?) // uti 用于区分 GIF 等格式
 
     private enum CodingKeys: String, CodingKey {
-        case type, text, image
+        case type, text, image, uti
     }
 
     init(from decoder: Decoder) throws {
@@ -18,7 +19,8 @@ enum ClipboardContent: Equatable, Hashable, Codable {
             self = .text(value)
         case "image":
             let data = try c.decode(Data.self, forKey: .image)
-            self = .image(data)
+            let uti = try c.decodeIfPresent(String.self, forKey: .uti)
+            self = .image(data: data, uti: uti)
         default:
             self = .text("")
         }
@@ -30,9 +32,10 @@ enum ClipboardContent: Equatable, Hashable, Codable {
         case .text(let value):
             try c.encode("text", forKey: .type)
             try c.encode(value, forKey: .text)
-        case .image(let data):
+        case .image(let data, let uti):
             try c.encode("image", forKey: .type)
             try c.encode(data, forKey: .image)
+            try c.encodeIfPresent(uti, forKey: .uti)
         }
     }
 }
@@ -62,8 +65,23 @@ extension ClipboardItem {
         switch content {
         case .text(let value):
             return value.trimmingCharacters(in: .whitespacesAndNewlines)
-        case .image:
+        case .image(_, let uti):
+            if let uti = uti, (uti == UTType.gif.identifier || uti == "com.compuserve.gif") {
+                return "[GIF]"
+            }
             return "[图片]"
+        }
+    }
+    
+    var isGif: Bool {
+        switch content {
+        case .image(_, let uti):
+            if let uti = uti {
+                return uti == UTType.gif.identifier || uti == "com.compuserve.gif"
+            }
+            return false
+        default:
+            return false
         }
     }
 }

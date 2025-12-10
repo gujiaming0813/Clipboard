@@ -27,7 +27,7 @@ final class HotkeyManager: ObservableObject {
         }, 1, &eventSpec, UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque()), &eventHandler)
 
         let signature: OSType = 0x434C4250 // "CLBP"
-        var hotKeyID = EventHotKeyID(signature: signature, id: 1)
+        let hotKeyID = EventHotKeyID(signature: signature, id: 1)
         let status = RegisterEventHotKey(keyCode, modifiers, hotKeyID, GetEventDispatcherTarget(), 0, &hotKeyRef)
         if status != noErr {
             print("Hotkey registration failed: \(status)")

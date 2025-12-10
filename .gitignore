@@ -1,3 +1,4 @@
 /.build
 /.swiftpm
 .DS_Store
+/Clipboard/Clipboard.xcodeproj/project.xcworkspace/xcuserdata
