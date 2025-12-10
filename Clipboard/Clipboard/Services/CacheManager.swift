@@ -56,6 +56,14 @@ final class CacheManager {
         }
     }
 
+    /// 清空所有缓存文件（历史与图片）
+    func clearAll() {
+        let files = (try? fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)) ?? []
+        for file in files {
+            try? fileManager.removeItem(at: file)
+        }
+    }
+
     private func persistImages(_ items: [ClipboardItem]) {
         for item in items {
             guard case .image(let data, _) = item.content else { continue }

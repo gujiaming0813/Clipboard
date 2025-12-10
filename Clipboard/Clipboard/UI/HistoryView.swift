@@ -29,6 +29,11 @@ struct HistoryView: View {
             Text("剪贴板历史")
                 .font(.title3.bold())
             Spacer()
+            Button("清空") {
+                monitor.clearClipboard()
+                history.clearAll()
+            }
+            .buttonStyle(.borderedProminent)
             Button {
                 NSApplication.shared.terminate(nil)
             } label: {

@@ -164,5 +164,11 @@ final class ClipboardMonitor: ObservableObject {
             }
         }
     }
+
+    /// 清空系统剪贴板，且不记录历史
+    func clearClipboard() {
+        suppressNextCapture = true
+        pasteboard.clearContents()
+    }
 }
 

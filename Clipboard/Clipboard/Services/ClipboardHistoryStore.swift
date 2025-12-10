@@ -35,6 +35,12 @@ final class ClipboardHistoryStore: ObservableObject {
         cacheManager.cleanup(limit: limit)
     }
 
+    /// 清空历史与缓存
+    func clearAll() {
+        items.removeAll()
+        cacheManager.clearAll()
+    }
+
     private func isDuplicate(_ item: ClipboardItem) -> Bool {
         guard let first = items.first else { return false }
         return first.content == item.content
