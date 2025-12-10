@@ -12,6 +12,8 @@ struct ClipboardApp: App {
                 .environmentObject(services.monitor)
                 .frame(width: 360, height: 520)
         }
+        .menuBarExtraStyle(.window) // 使用窗口样式以支持热键激活
+        
         Settings {
             PreferencesView()
                 .environmentObject(services.historyStore)
@@ -24,12 +26,14 @@ struct ClipboardApp: App {
 final class AppServices: ObservableObject {
     let historyStore: ClipboardHistoryStore
     let monitor: ClipboardMonitor
+    let hotkeyManager: HotkeyManager
 
     init() {
         let cache = CacheManager()
         let store = ClipboardHistoryStore(cacheManager: cache, limit: 100)
         historyStore = store
         monitor = ClipboardMonitor(history: store)
+        hotkeyManager = HotkeyManager()
 
         DispatchQueue.main.async { [weak self] in
             self?.start()
@@ -38,5 +42,8 @@ final class AppServices: ObservableObject {
 
     private func start() {
         monitor.start()
+        hotkeyManager.register {
+            NSApp.activate(ignoringOtherApps: true)
+        }
     }
 }
