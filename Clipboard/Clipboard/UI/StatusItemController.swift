@@ -4,6 +4,8 @@ import SwiftUI
 /// 管理状态栏图标与弹出的窗口，点击或快捷键调用同一弹出行为
 /// 使用 NSPanel 替代 NSPopover，以支持在全屏应用上显示
 final class StatusItemController: NSObject {
+    static weak var shared: StatusItemController?
+    static var lastActiveApp: NSRunningApplication?
     private let statusItem: NSStatusItem
     private var panel: NSPanel?
     private let historyStore: ClipboardHistoryStore
@@ -15,6 +17,7 @@ final class StatusItemController: NSObject {
         self.monitor = monitor
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         super.init()
+        StatusItemController.shared = self
         configureStatusItem()
         createPanel()
     }
@@ -81,6 +84,9 @@ final class StatusItemController: NSObject {
     private func showPanel() {
         guard let panel = panel else { return }
         
+        // 记录弹出前的前台应用，用于后续粘贴时恢复焦点
+        StatusItemController.lastActiveApp = NSWorkspace.shared.frontmostApplication
+        
         let screenFrame = NSScreen.main?.frame ?? .zero
         var panelFrame = panel.frame
         
@@ -117,6 +123,10 @@ final class StatusItemController: NSObject {
     private func closePanel() {
         panel?.orderOut(nil)
         stopEventMonitor()
+    }
+
+    func closePanelPublic() {
+        closePanel()
     }
 
     private func startEventMonitor() {

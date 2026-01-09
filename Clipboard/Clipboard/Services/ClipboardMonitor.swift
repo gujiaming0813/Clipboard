@@ -40,32 +40,23 @@ final class ClipboardMonitor: ObservableObject {
         }
 
         // 优先检测 GIF（检查多种可能的类型标识符）
-        let gifTypes = [
-            UTType.gif.identifier,
-            "com.compuserve.gif",
-            "public.gif"
+        let gifTypes: [NSPasteboard.PasteboardType] = [
+            .init(UTType.gif.identifier),
+            .init("com.compuserve.gif"),
+            .init("public.gif")
         ]
         
-        var foundGif = false
-        for gifType in gifTypes {
-            if let gifData = pasteboard.data(forType: .init(gifType)) {
-                // 验证数据确实是 GIF（检查文件头）
-                if gifData.count >= 6,
-                   String(data: gifData.prefix(6), encoding: .ascii) == "GIF89a" ||
-                   String(data: gifData.prefix(6), encoding: .ascii) == "GIF87a" {
-                    handleGifData(gifData)
-                    foundGif = true
-                    break
-                }
-            }
+        if let gifType = pasteboard.availableType(from: gifTypes),
+           let gifData = pasteboard.data(forType: gifType),
+           isGifData(gifData) {
+            handleGifData(gifData)
+            return
         }
         
-        if !foundGif {
-            if let image = NSImage(pasteboard: pasteboard) {
-                handleImage(image)
-            } else if let text = pasteboard.string(forType: .string) {
-                handleText(text)
-            }
+        if let image = NSImage(pasteboard: pasteboard) {
+            handleImage(image)
+        } else if let text = pasteboard.string(forType: .string) {
+            handleText(text)
         }
     }
 
@@ -115,15 +106,26 @@ final class ClipboardMonitor: ObservableObject {
         case .image(let data, let uti):
             // 如果是 GIF，使用原始数据保持格式
             if let uti = uti, (uti == UTType.gif.identifier || uti == "com.compuserve.gif") {
+                let gifTypes: [NSPasteboard.PasteboardType] = [
+                    .init(UTType.gif.identifier),
+                    .init("com.compuserve.gif"),
+                    .init("public.gif")
+                ]
                 let pbItem = NSPasteboardItem()
-                // 尝试多种 GIF 类型标识符以确保兼容性
-                pbItem.setData(data, forType: .init(UTType.gif.identifier))
-                pbItem.setData(data, forType: .init("com.compuserve.gif"))
+                for type in gifTypes {
+                    pbItem.setData(data, forType: type)
+                }
                 pasteboard.writeObjects([pbItem])
             } else if let image = NSImage(data: data) {
                 pasteboard.writeObjects([image])
             }
         }
+    }
+
+    private func isGifData(_ data: Data) -> Bool {
+        guard data.count >= 6 else { return false }
+        let header = String(data: data.prefix(6), encoding: .ascii)
+        return header == "GIF89a" || header == "GIF87a"
     }
 
     /// 清空系统剪贴板，且不记录历史

@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 struct HistoryView: View {
     @EnvironmentObject private var history: ClipboardHistoryStore
@@ -107,6 +108,11 @@ private struct HistoryRow: View {
         .onTapGesture {
             copyToPasteboard(item)
         }
+        .onTapGesture(count: 2) {
+            copyToPasteboard(item)
+            // 双击仅复制并关闭面板，不再尝试自动粘贴
+            StatusItemController.shared?.closePanelPublic()
+        }
         .onHover { hovering in
             withAnimation(.easeInOut(duration: 0.12)) {
                 isHovering = hovering
@@ -173,6 +179,10 @@ private struct HistoryRow: View {
     private func copyToPasteboard(_ item: ClipboardItem) {
         monitor.copyFromHistory(item)
         onCopy(item.bundleName ?? "已复制")
+    }
+    
+    private func pasteToFrontmostApp() {
+        // 不再自动粘贴，保持空实现占位
     }
 }
 
